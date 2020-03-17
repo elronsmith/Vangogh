@@ -35,13 +35,34 @@ class Vangogh {
     internal lateinit var containerBuilder: Container.IBuilder
 
     fun fromUrl(imageUrl: String): Container {
-        val container = Container(this)
+        val container = containerBuilder.newInstance()
         container.imageUrl = imageUrl
         container.vangogh = this
         return container
     }
 
-    fun start(container: Container) = threadManager.getHandler().post(container)
+    fun start(container: Container) = threadManager.post(container)
+
+    fun run(container: Container) {
+        runDownloading(container)
+        container.onResultMainThread()
+    }
+
+    fun runDownloading(container: Container) {
+        with(container) {
+            if (imageUrl != null) {
+                bitmap = cache.get(imageUrl!!)
+                if (bitmap == null) {
+                    // скачиваем
+                    downloader.start(this)
+
+                    // кешируем
+                    if (imageUrl != null && bitmap != null)
+                        cache.put(imageUrl!!, bitmap!!)
+                }
+            }
+        }
+    }
 
     class Builder {
         var downloader: IDownloader? = null
@@ -102,8 +123,8 @@ class Vangogh {
 
             vangogh.cache = this.cache ?: NoCache()
 
-            vangogh.containerBuilder = this.containerBuilder?.with(vangogh)
-                ?: SingleContainerBuilder(vangogh)
+            vangogh.containerBuilder = this.containerBuilder?.with(vangogh) ?:
+                    SingleContainerBuilder(vangogh)
 
             return vangogh
         }
@@ -114,7 +135,7 @@ class Vangogh {
     }
 
     interface IThreadManager {
-        fun getHandler(): Handler
+        fun post(container: Container)
     }
 
     interface ICache {
@@ -122,7 +143,7 @@ class Vangogh {
         fun put(id: String, bitmap: Bitmap)
     }
 
-    interface VangoghResultListener {
+    interface ResultListener {
         /**
          * вызывается когда изображение получено(или нет)
          * может вызываться как в main потоке так и в другом потоке

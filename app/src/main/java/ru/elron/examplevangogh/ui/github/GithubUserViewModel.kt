@@ -9,14 +9,14 @@ import ru.elron.examplevangogh.App
 import ru.elron.examplevangogh.R
 import ru.elron.examplevangogh.data.User
 import ru.elron.examplevangogh.utils.vangogh.Container
-import ru.elron.examplevangogh.utils.vangogh.Vangogh.VangoghResultListener
+import ru.elron.examplevangogh.utils.vangogh.Vangogh.ResultListener
 import java.net.URL
 
 class GithubUserViewModel(application: Application) : AndroidViewModel(application) {
     val avatarLiveData = MutableLiveData<Bitmap>()
     val errorAvatarLiveData = MutableLiveData<Int>()
     var user: User? = null
-    val onResultListener = object : VangoghResultListener {
+    val onResultListener = object : ResultListener {
         override fun onResult(container: Container) {
             if (container.bitmap == null && container.error != 0)
                 errorAvatarLiveData.postValue(container.error)

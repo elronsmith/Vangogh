@@ -7,8 +7,8 @@ import android.os.HandlerThread
  * Будет скачивать изображения в нескольких потоках
  */
 class MultiThreadManager(count: Int = 2) : Vangogh.IThreadManager {
-    var array: Array<Pair<HandlerThread, Handler>?> = arrayOfNulls(count)
-    var index = 0
+    private var array: Array<Pair<HandlerThread, Handler>?> = arrayOfNulls(count)
+    private var index = 0
 
     init {
         for (i in 0..array.lastIndex)
@@ -23,8 +23,12 @@ class MultiThreadManager(count: Int = 2) : Vangogh.IThreadManager {
         return Pair(thread, Handler(thread.looper))
     }
 
-    override fun getHandler(): Handler {
+    private fun getHandler(): Handler {
         if (index >= array.size) index = 0
         return array[index++]!!.second
+    }
+
+    override fun post(container: Container) {
+        getHandler().post(container)
     }
 }

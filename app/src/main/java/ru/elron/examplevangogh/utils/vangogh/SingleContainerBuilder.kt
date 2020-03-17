@@ -8,7 +8,7 @@ class SingleContainerBuilder(_vangogh: Vangogh) : Container.IBuilder() {
         this.vangogh = _vangogh
     }
 
-    override fun newInstance(): Container =
-        Container(vangogh)
+    override fun newInstance(): Container = Container(vangogh)
+
     override fun release(container: Container) = container.clear()
 }

@@ -17,6 +17,7 @@ class DefaultImageDownloader: Vangogh.IDownloader {
             container.bitmap = BitmapFactory.decodeStream(inputStream)
         } catch (e: Exception) {
             e.printStackTrace()
+            container.bitmap = null
         }
     }
 }

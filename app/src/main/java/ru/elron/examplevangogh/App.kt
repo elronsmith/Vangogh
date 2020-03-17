@@ -2,10 +2,7 @@ package ru.elron.examplevangogh
 
 import android.app.Application
 import android.util.Log
-import ru.elron.examplevangogh.utils.vangogh.FileRamCache
-import ru.elron.examplevangogh.utils.vangogh.MultiThreadManager
-import ru.elron.examplevangogh.utils.vangogh.PoolContainerBuilder
-import ru.elron.examplevangogh.utils.vangogh.Vangogh
+import ru.elron.examplevangogh.utils.vangogh.*
 import java.io.File
 
 class App: Application() {
@@ -21,6 +18,8 @@ class App: Application() {
         lateinit var mainHandlerVangogh: Vangogh
         // c кешем, c пулом и 2 потоками
         lateinit var poolVangogh: Vangogh
+        // c кешем, c пулом на корутинах
+        lateinit var coroutinePoolVangogh: Vangogh
 
     }
 
@@ -44,6 +43,11 @@ class App: Application() {
             .withCache(FileRamCache(cacheFile))
             .withContainerBuilder(PoolContainerBuilder())
             .withThreadManager(MultiThreadManager())
+            .build()
+        coroutinePoolVangogh = Vangogh.Builder()
+//            .withCache(FileRamCache(cacheFile))
+            .withContainerBuilder(PoolContainerBuilder())
+            .withThreadManager(CoroutineThreadManager())
             .build()
 
     }

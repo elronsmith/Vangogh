@@ -46,6 +46,8 @@ dependencies {
     // kotlin
     implementation rootProject.ext.deps.kotlinJdk7
     kapt rootProject.ext.deps.arch.compiler
+    // coroutines
+    implementation rootProject.ext.deps.coroutines
 
     // net
     implementation rootProject.ext.deps.okhttp3

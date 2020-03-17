@@ -7,9 +7,12 @@ class Container(var vangogh: Vangogh): Runnable {
     var imageUrl: String? = null
     var bitmap: Bitmap? = null
 
+    @DrawableRes
     var error: Int = 0
-    var listener: Vangogh.VangoghResultListener? = null
+    var resultListener: Vangogh.ResultListener? = null
     var to: Any? = null
+
+    val mainRunnable = Runnable{ onResult() }
 
     /**
      * Ресурс на drawable
@@ -19,46 +22,33 @@ class Container(var vangogh: Vangogh): Runnable {
         return this
     }
 
-    fun to(listener: Vangogh.VangoghResultListener, to: Any? = null) {
-        this.listener = listener
+    fun to(resultListener: Vangogh.ResultListener, to: Any? = null) {
+        this.resultListener = resultListener
         this.to = to
         vangogh.start(this)
     }
 
-    val mainRunnable = Runnable{ listener?.onResult(this) }
+    override fun run() = vangogh.run(this)
+    fun runDownloading() = vangogh.runDownloading(this)
 
-    override fun run() {
-        if (imageUrl == null) {
-            onResult()
-        } else {
-            bitmap = vangogh.cache.get(imageUrl!!)
-            if (bitmap != null)
-                onResult()
-            else {
-                // скачиваем
-                vangogh.downloader.start(this)
-
-                // кешируем
-                if (imageUrl != null && bitmap != null)
-                    vangogh.cache.put(imageUrl!!, bitmap!!)
-
-                onResult()
-            }
-        }
-    }
-
-    private fun onResult() {
+    fun onResultMainThread() {
         if (vangogh.mainHandler != null)
             vangogh.mainHandler!!.post(mainRunnable)
         else
             mainRunnable.run()
     }
 
+    fun onResult() {
+        resultListener?.onResult(this)
+        vangogh.containerBuilder.release(this)
+    }
+
     fun clear() {
+        imageUrl = null
         bitmap = null
-        listener = null
-        to = null
         error = 0
+        resultListener = null
+        to = null
     }
 
     abstract class IBuilder {

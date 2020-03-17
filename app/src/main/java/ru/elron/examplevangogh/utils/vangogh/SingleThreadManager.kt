@@ -7,8 +7,8 @@ import android.os.HandlerThread
  * Будет скачивать изображения в одном потоке
  */
 class SingleThreadManager(threadName: String = "SingleVangogh") : Vangogh.IThreadManager {
-    val thread: HandlerThread
-    val threadHandler: Handler
+    private val thread: HandlerThread
+    private val threadHandler: Handler
 
     init {
         thread = HandlerThread(threadName)
@@ -18,5 +18,7 @@ class SingleThreadManager(threadName: String = "SingleVangogh") : Vangogh.IThrea
         threadHandler = Handler(thread.looper)
     }
 
-    override fun getHandler(): Handler = threadHandler
+    override fun post(container: Container) {
+        threadHandler.post(container)
+    }
 }

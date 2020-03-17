@@ -13,18 +13,11 @@ import java.util.*
  * - файлы
  * - ограничение размера кеша
  */
-class FileRamCache(rootFile: File, size: Int = 1000) : Vangogh.ICache {
-    var cacheMap: MutableMap<String, Bitmap> = HashMap() // ссылка-изображение
-    var dateCacheMap: MutableMap<String, Long> = HashMap() // ссылка-дата
+class FileRamCache(rootFile: File, maxFilesCount: Int = 1000) : Vangogh.ICache {
+    var cacheMap = Hashtable<String, Bitmap>() // ссылка-изображение
+    var dateCacheMap = Hashtable<String, Long>() // ссылка-дата
 
-    val fileCache: FileCache
-
-    init {
-        fileCache = FileCache(
-            rootFile,
-            size
-        )
-    }
+    val fileCache = FileCache(rootFile, maxFilesCount)
 
     override fun get(id: String): Bitmap? {
         // сначала берем из RAM
@@ -54,7 +47,7 @@ class FileRamCache(rootFile: File, size: Int = 1000) : Vangogh.ICache {
      * - максимальное кол-во файлов в кеше
      * - /data/user/0/ru.elron/files/cache_images
      */
-    class FileCache(val rootFile: File, val size: Int = 1000) : Vangogh.ICache {
+    class FileCache(val rootFile: File, val maxFilesCount: Int = 1000) : Vangogh.ICache {
         private val handlerThread: HandlerThread
         private val handler: Handler
 
@@ -128,7 +121,7 @@ class FileRamCache(rootFile: File, size: Int = 1000) : Vangogh.ICache {
         /** удаляет лишние изображения */
         fun optimizeFileCache() {
             val list = rootFile.listFiles()
-            if (list.size > size) {
+            if (list.size > maxFilesCount) {
                 // есть лишние файлы, удаляем
                 // находим самый старый файл и удаляем
                 var index = 0

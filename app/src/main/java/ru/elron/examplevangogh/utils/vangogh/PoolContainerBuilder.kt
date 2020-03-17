@@ -6,18 +6,10 @@ import androidx.core.util.Pools
  * Экземпляры не уничтожаются, а переиспользуются
  */
 class PoolContainerBuilder(size: Int = 128) : Container.IBuilder() {
-    val pool: Pools.SimplePool<Container>
+    private val pool: Pools.SimplePool<Container> = Pools.SimplePool<Container>(size)
 
-    init {
-        pool =
-            Pools.SimplePool<Container>(
-                size
-            )
-    }
+    override fun newInstance(): Container = pool.acquire() ?: Container(vangogh)
 
-    override fun newInstance(): Container = pool.acquire() ?: Container(
-        vangogh
-    )
     override fun release(container: Container) {
         container.clear()
         pool.release(container)
